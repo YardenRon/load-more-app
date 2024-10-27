@@ -3,11 +3,13 @@ import Product from "../../models/product";
 import './styles.scss';
 
 const PRODUCTS_URL = "https://dummyjson.com/products";
+const PRODUCTS_LIMIT = 100;
 
 const Products = () => {
     const [products, setProducts] = useState<Product[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [count, setCount] = useState<number>(0);
+    const [reachedLimit, setReachedLimit] = useState<boolean>(false);
 
     useEffect(() => {
         const fetchProducts = async () => {
@@ -17,7 +19,7 @@ const Products = () => {
                 const result = await response.json();
 
                 if (result && result.products && result.products.length) {
-                    setProducts(result.products);
+                    setProducts(prevProducts => [...prevProducts, ...result.products]);
                     setIsLoading(false);
                 }
             } catch (error: any) {
@@ -25,9 +27,15 @@ const Products = () => {
             }
         };
         fetchProducts();
-    }, []);
+    }, [count]);
 
-    const onLoadMoreClick = () => null;
+    useEffect(() => {
+        if (products && products.length === PRODUCTS_LIMIT) {
+            setReachedLimit(true);
+        }
+    }, [products]);
+
+    const onLoadMoreClick = () => setCount(count+1);
 
     if (isLoading) {
         return <div> Loading products. Please wait...</div>
@@ -48,7 +56,10 @@ const Products = () => {
                 }
             </div>
             <div className="button-container">
-                <button onClick={onLoadMoreClick}>Load More Products</button>
+                <button onClick={onLoadMoreClick} disabled={reachedLimit}>Load More Products</button>
+                {
+                    reachedLimit && <p> You have reached {PRODUCTS_LIMIT} products </p>
+                }
             </div>
         </div>
     );
