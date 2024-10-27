@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import Product from "../../models/product";
+import './styles.scss';
 
 const PRODUCTS_URL = "https://dummyjson.com/products";
 
